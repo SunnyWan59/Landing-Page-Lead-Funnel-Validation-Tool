@@ -1,6 +1,8 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from api import run_test
+
 
 from dotenv import load_dotenv 
 load_dotenv()
@@ -32,7 +34,7 @@ async def test(url):
     Health check endpoint to verify the API is running.
     Returns a simple status message.
     """
-    return {"status": "healthy", "message": "https://"+ url}
+    return run_test("https://" + url)
 
 
 def main():

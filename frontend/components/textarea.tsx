@@ -14,7 +14,7 @@ const SearchBar: React.FC = () => {
     setError(null);
     
     try {
-      const response = await fetch(`http://localhost:8000/test/https://{${query}`, {
+      const response = await fetch(`http://localhost:8000/test/${query.startsWith('https://') ? query : `https://${query}`}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',
