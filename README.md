@@ -1,32 +1,27 @@
 # Landing Page Lead Funnel Validation Tool
 
+## Starting Frontend
+```bash
+cd frontend
+npm run dev
+```
+## Starting Backend
+```bash
+cd backend
+python server.py
+```
+## Testing
+I created my own sample lanidn page that has multiple different booking sites: https://sample-booking-site.vercel.app/
+
 ## Overview
-The goal of this take home assignment is to create a web app that helps companies validate their "Book a Demo" conversion flow. The application should take a URL and verify that new users can successfully schedule a demo meeting through the company's landing page.
+The general idea to my solution is that we find links to known booking sites, and then proceed to test the booking flow of each link. If there are multiple booking links to multiple sites, we will will test each one of them. 
 
-## Core Requirements
-1. Create a web app with a simple interface where users can:
-   - Input a company's landing page URL
-   - Trigger automated testing of the demo booking flow
-   - View test results and insights
+This approahc comes with upsides:
+- It finding the links easier:
+  - instead of having to crawl the entire page and see which buttons directed to booking sites, we can just directed find them via built in Selenium functions
+However, this design decision comes with a few drawbacks:
+- If the landing page uses a booking site that is not supported, my solution won't be able to find and test it
 
-2. The application should test the demo booking functionality:
-   - Detect "Book a Demo" (or similar) buttons/links
-   - Click through to the booking flow
-   - Fill out any required forms
-   - Complete the meeting scheduling process
-   - Verify the booking was successful (e.g., confirmation page)
-
-3. Present test results in a clear, user-friendly format showing:
-   - Whether the demo booking flow was found
-   - If the booking process completed successfully
-   - Errors or issues encountered
-   - Insights or metrics of interest
-
-## Technical Guidelines
-- You may use any programming languages, frameworks, or tools you prefer sop long as you can explain your work
-
-## Examples
-https://www.revyl.ai/ - validate "Book a demo" button is clickable and leads to a booking page, books a meeting and then validates the booking was successful.
-
----
-Note: This is an open-ended assignment designed to evaluate your problem-solving approach. Focus on delivering a working solution that demonstrates your ability to ship fast.
+I chose this approach for a few reasons:
+- Simplicity: The solution is very straight forward and introduces very few complexities
+- Each booking site is unique, so we already have to manually add support for each one.
