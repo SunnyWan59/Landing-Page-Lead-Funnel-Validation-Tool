@@ -40,7 +40,7 @@ def find_links(driver):
 
 
 
-def read_links(links: list):
+def read_links(links: list) -> list[str]:
     '''
     For debugging purposes
     '''
@@ -54,6 +54,7 @@ def read_links(links: list):
 def test_booking_link(driver) -> dict:
     results = {
         'demo_link_works': False,
+        'booking_flow': False,
         'booking_completed': False,
         'errors': [],
         'insights': {}
@@ -109,6 +110,7 @@ def test_booking_link(driver) -> dict:
                 (By.XPATH, "//input[@autocomplete='email']")
             )
         )
+        
         email_input.send_keys(sample_user['email'])
         
         WebDriverWait(driver, 10).until(
@@ -116,7 +118,7 @@ def test_booking_link(driver) -> dict:
                 (By.XPATH, "//button[@type='submit' and .//span[contains(text(),'Schedule Event')]]")
             )
         ).click()
-        # Wait for and validate the confirmation message
+        results['booking_flow'] = True
     except Exception as e:
         results['errors'].append(f"Error booking an appointment: {str(e)}")
         return results
@@ -145,10 +147,23 @@ def test_booking_link(driver) -> dict:
 
     return results
 
-def run_test(url):
+def transform_results(results: dict) -> dict:
+    '''
+    transforms the result of each test into a more pretty and user friendly format.
+    '''
+    transformed_results = {
+        "Testing Booking Link Works": "Success✅" if results.get('demo_link_works', False) else "Failed",
+        "Testing Booking Flow Works": "Success✅" if results.get('booking_flow', False) else "Failed",
+        "Testing Booking Confirmaton": "Success✅" if results.get('booking_completed', False) else "Failed",
+        "Errors": "None" if not results.get('errors', False) else[],
+        "Insights": results.get('insights', [])
+    }
+    return transformed_results
+
+def run_test(url: str) -> dict:
     results = {
         'demo_button_found': False,
-        'link_results': {},
+        'test_results': {},
         'errors': []
     }
 
@@ -165,7 +180,8 @@ def run_test(url):
     for link in links:
         try:
             driver.get(link)
-            results['test_results'][link] = test_booking_link(driver)
+            link_result = transform_results(test_booking_link(driver))
+            results['test_results'][link] = link_result
         except Exception as e:
             results['errors'].append(f"'Book a Demo' button not found: {str(e)}")
             return results
