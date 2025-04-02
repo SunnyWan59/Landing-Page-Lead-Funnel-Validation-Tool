@@ -3,6 +3,9 @@
 import React, { useState } from 'react';
 import {DisplayResults} from './results'
 
+require('dotenv').config();
+
+
 const SearchBar: React.FC = () => {
   const [query, setQuery] = useState<string>(''); // search input state
   const [result, setResult] = useState<string>(''); // stores endpoint response
@@ -13,9 +16,13 @@ const SearchBar: React.FC = () => {
     e.preventDefault();
     setLoading(true);
     setError(null);
-    
+
+    const backend_url = process.env.NEXT_PUBLIC_BACKEND;
+
+    console.log(backend_url)
+
     try {
-      const response = await fetch(`http://localhost:8000/test/${query.startsWith('https://') ? query : `https://${query}`}`, {
+      const response = await fetch(`${backend_url}test/${query.startsWith('https://') ? query : `https://${query}`}`, {
         method: 'GET',
         headers: {
           'Content-Type': 'application/json',

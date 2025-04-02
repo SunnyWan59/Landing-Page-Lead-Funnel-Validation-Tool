@@ -6,20 +6,16 @@ from api.booking import run_test
 
 from dotenv import load_dotenv 
 load_dotenv()
-origins = [
-    "http://localhost:3000",
-    "https://landing-page-lead-funnel-validation-tool.vercel.app"
-]
 import uvicorn
 
 app = FastAPI()
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,         # allows requests from these origins
+    allow_origins=["*"],         
     allow_credentials=True,
-    allow_methods=["*"],           # allows all HTTP methods
-    allow_headers=["*"],           # allows all headers
+    allow_methods=["*"],         
+    allow_headers=["*"],          
 )
 
 @app.get("/health")
