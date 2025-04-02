@@ -136,6 +136,16 @@ def test_booking_link(booking_link, driver) -> dict:
             )
         )
 
+        details_div = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//div[@data-container='details']")
+            )
+        )
+        
+        # Capture all the visible text within the details div
+        all_text = details_div.text
+        results["insights"]['Booking Details'] = all_text
+
         results['booking_completed'] = True
     except Exception as e:
         results['errors'].append(f"Could not confirmation booking: {str(e)}")

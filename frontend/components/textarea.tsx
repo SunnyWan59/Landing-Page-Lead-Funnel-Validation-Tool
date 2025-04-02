@@ -58,7 +58,18 @@ const SearchBar: React.FC = () => {
       {result && (
         <div>
           <h3>Response:</h3>
-          <pre>{result}</pre>
+          <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
+            {typeof result === 'string' ? 
+              (() => {
+                try {
+                  const jsonData = JSON.parse(result);
+                  return JSON.stringify(jsonData, null, 2);
+                } catch (e) {
+                  return result;
+                }
+              })() 
+              : result}
+          </pre>
         </div>
       )}
     </div>
