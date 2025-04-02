@@ -40,7 +40,7 @@ def find_links(driver):
 
 
 
-def _read_links(links: list):
+def read_links(links: list):
     '''
     For debugging purposes
     '''
@@ -51,21 +51,13 @@ def _read_links(links: list):
 
 
 
-def test_booking_link(booking_link, driver) -> dict:
+def test_booking_link(driver) -> dict:
     results = {
-        'demo_button_found': False,
         'demo_link_works': False,
         'booking_completed': False,
         'errors': [],
         'insights': {}
     }
-
-    try:
-        booking_link.click()
-        results['demo_button_found'] = True
-    except Exception as e:
-        results['errors'].append(f"'Book a Demo' button not found: {str(e)}")
-        return results
     
     # Validate that the booking page loaded successfully
     try:
@@ -154,16 +146,29 @@ def test_booking_link(booking_link, driver) -> dict:
     return results
 
 def run_test(url):
-    results = []
+    results = {
+        'demo_button_found': False,
+        'link_results': {},
+        'errors': []
+    }
 
     driver = webdriver.Chrome()
 
     driver.get(url)
 
-    elements = find_links(driver=driver)
+    # elements = find_links(driver=driver)
 
-    for element in elements:
-        results.append(test_booking_link(element, driver))
+    links = read_links(find_links(driver=driver))
+    if len(links): 
+        results['demo_button_found'] = True
+        
+    for link in links:
+        try:
+            driver.get(link)
+            results['test_results'][link] = test_booking_link(driver)
+        except Exception as e:
+            results['errors'].append(f"'Book a Demo' button not found: {str(e)}")
+            return results
 
     time.sleep(5)
 

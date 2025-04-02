@@ -17,10 +17,12 @@ function Home() {
           <header className="flex justify-between items-center p-4 border-b">
               <h1 className="text-xl font-bold">Landing Page Lead Funnel Validation Tool</h1>
           </header>
-        <div className="flex flex-col justify-center items-center min-h-[calc(100vh-80px)]">
-          <div className="flex flex-col items-center">
-            <h1 className="text-5xl font-bold text-center mb-6 w-full max-w-md">Input a landing URL</h1>
-              <SearchBar />
+        <div className="flex flex-col justify-center items-center min-h-[calc(100vh-80px)] w-full max-w-4xl mx-auto">
+          <div className="flex flex-col items-center w-full">
+            <h1 className="text-5xl font-bold text-center mb-6 w-full max-w-2xl">Input a landing URL</h1>
+              <div className="w-full max-w-2xl">
+                <SearchBar />
+              </div>
           </div>
         </div>
         </Theme>

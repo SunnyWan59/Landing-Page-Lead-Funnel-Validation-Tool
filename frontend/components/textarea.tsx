@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from 'react';
+import {DisplayResults} from './results'
 
 const SearchBar: React.FC = () => {
   const [query, setQuery] = useState<string>(''); // search input state
@@ -33,10 +34,11 @@ const SearchBar: React.FC = () => {
       setLoading(false);
     }
   };
+  
 
   return (
     <div>
-      <form onSubmit={handleSearch} className="flex">
+      <form onSubmit={handleSearch} className="flex justify-center w-full">
         <input
           type="text"
           value={query}
@@ -58,17 +60,8 @@ const SearchBar: React.FC = () => {
       {result && (
         <div>
           <h3>Response:</h3>
-          <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96">
-            {typeof result === 'string' ? 
-              (() => {
-                try {
-                  const jsonData = JSON.parse(result);
-                  return JSON.stringify(jsonData, null, 2);
-                } catch (e) {
-                  return result;
-                }
-              })() 
-              : result}
+          <pre className="bg-gray-100 p-4 rounded overflow-auto max-h-96 w-full max-w-4xl">
+            <DisplayResults jsonData={JSON.parse(result)}/>
           </pre>
         </div>
       )}
