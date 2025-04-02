@@ -12,11 +12,14 @@ The idea is:
 2. Find booking buttons
     - Options:
         1. We can find the buttons via calendly / cal / etc in href
+            - Pros: We can gaurantee that the links will be links to booking sites
+            - Cons: The tests only work for booking services that we support  
+                    i.e. if some used other-booking-site.com, that we dont support
         2. Check for words like "Book" or "Consultation" in divs
             - Cons: potential false positives
         3. Crawl entire website
             - won't miss out on any booking links
-            - Cons: slow
+            - Cons: slow, complex
 
 3. Test the pressing
 4. Receive failure or confirmation
@@ -27,18 +30,17 @@ The idea is:
 
 def find_links(driver):
     '''
-    For now we will only support calendly links
+    For now we will only support calendly and cal links
 
     TODO: support other booking programs
     '''
+
     try:
-        calendly_links = driver.find_elements(By.CSS_SELECTOR, "a[href*='calendly.com']")
-        return calendly_links
+        return driver.find_elements(By.CSS_SELECTOR, "a[href*='calendly.com'], a[href*='cal.com']")
     except Exception as e:
         print(f"Error finding Calendly link: {e}")
         return None
-
-
+    
 
 def read_links(links: list) -> list[str]:
     '''
@@ -50,8 +52,10 @@ def read_links(links: list) -> list[str]:
     return read_links
 
 
-
-def test_booking_link(driver) -> dict:
+def test_calendly_booking_link(driver) -> dict:
+    '''
+    Check if the booking link works, currently only works for calendly
+    '''
     results = {
         'demo_link_works': False,
         'booking_flow': False,
@@ -105,12 +109,13 @@ def test_booking_link(driver) -> dict:
             )
         )
         name_input.send_keys(sample_user['name'])
+
+
         email_input = WebDriverWait(driver, 10).until(
             EC.presence_of_element_located(
                 (By.XPATH, "//input[@autocomplete='email']")
             )
         )
-        
         email_input.send_keys(sample_user['email'])
         
         WebDriverWait(driver, 10).until(
@@ -147,14 +152,93 @@ def test_booking_link(driver) -> dict:
 
     return results
 
+
+def test_cal_booking_link(driver):
+    results = {
+            'demo_link_works': False,
+            'booking_flow': False,
+            'booking_completed': False,
+            'errors': [],
+            'insights': {}
+        }
+    try:
+        current_url = driver.current_url
+        if 'cal.com' in current_url:
+            results['demo_link_works'] = True
+            results['insights']['booking_url'] = current_url
+        else:
+            raise Exception("Booking link is invalid")
+    except Exception as e:
+        results['errors'].append(f"Error validating booking page: {str(e)}")
+        return results
+
+    sample_user = {
+            'name': 'Test User',
+            'email': 'testuser@example.com',
+        }
+    
+    try:
+        button = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//button[@data-testid='time']")
+                )
+        ).click()
+        
+        name_input= WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "name"))
+        )
+        name_input.send_keys(sample_user['name'])
+        email_input= WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.NAME, "email"))
+        )
+        email_input.send_keys(sample_user['email'])
+
+        WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//button[@type='submit']")
+            )
+        ).click()
+
+    except Exception as e:
+        results['errors'].append(f"Error booking an appointment: {str(e)}")
+        return results
+    
+    try:
+        confirmation_message = WebDriverWait(driver, 15).until(
+            EC.presence_of_element_located(
+                (By.XPATH, "//*[contains(text(), 'scheduled')]")
+            )
+        )
+
+        details_container = WebDriverWait(driver, 10).until(
+            EC.presence_of_element_located((By.XPATH, "//div[contains(@class, 'grid') and contains(@class, 'border-t')]"))
+        )
+    
+        what = details_container.find_element(By.XPATH, ".//div[@data-testid='booking-title']").text
+        
+        when = details_container.find_element(By.XPATH, ".//div[text()='When']/following-sibling::div[1]").text
+        
+        who = details_container.find_element(By.XPATH, ".//div[text()='Who']/following-sibling::div[1]").text
+            
+        all_text = what + "\n" + when + "\n" + who
+        results["insights"]['Booking Details'] = all_text
+
+        results['booking_completed'] = True
+    except Exception as e:
+        results['errors'].append(f"Could not confirmation booking: {str(e)}")
+        results['confirmation'] = False
+
+    return results
+
+
 def transform_results(results: dict) -> dict:
     '''
     transforms the result of each test into a more pretty and user friendly format.
     '''
     transformed_results = {
-        "Testing Booking Link Works": "Success✅" if results.get('demo_link_works', False) else "Failed",
-        "Testing Booking Flow Works": "Success✅" if results.get('booking_flow', False) else "Failed",
-        "Testing Booking Confirmaton": "Success✅" if results.get('booking_completed', False) else "Failed",
+        "Testing Booking Link Works": "Success ✅" if results.get('demo_link_works', False) else "Failed",
+        "Testing Booking Flow Works": "Success ✅" if results.get('booking_flow', False) else "Failed",
+        "Testing Booking Confirmaton": "Success ✅" if results.get('booking_completed', False) else "Failed",
         "Errors": "None" if not results.get('errors', False) else[],
         "Insights": results.get('insights', [])
     }
@@ -175,18 +259,26 @@ def run_test(url: str) -> dict:
 
     links = read_links(find_links(driver=driver))
     if len(links): 
-        results['demo_button_found'] = True
-        
+        results['Demo Button Found'] = True
+    
+
     for link in links:
         try:
             driver.get(link)
-            link_result = transform_results(test_booking_link(driver))
-            results['test_results'][link] = link_result
+            if 'calendly.com' in link:
+                link_result = test_calendly_booking_link(driver)
+            elif 'cal.com' in link:
+                link_result = test_cal_booking_link(driver)
+            else:
+                link_result = {"errors": [f"Unsupported booking platform in link: {link}"]}
+
+            # link_result = transform_results(test_booking_link(driver))
+            results['test_results'][link] =  transform_results(link_result)
         except Exception as e:
             results['errors'].append(f"'Book a Demo' button not found: {str(e)}")
             return results
 
-    time.sleep(5)
+    time.sleep(2)
 
     driver.close()
 
