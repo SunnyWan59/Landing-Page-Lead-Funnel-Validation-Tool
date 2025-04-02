@@ -8,7 +8,7 @@ from dotenv import load_dotenv
 load_dotenv()
 import uvicorn
 
-app = FastAPI()
+app = FastAPI(redirect_slashes=False)
 
 app.add_middleware(
     CORSMiddleware,
