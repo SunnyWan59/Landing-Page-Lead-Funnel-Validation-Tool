@@ -1,7 +1,7 @@
 import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from api.server import run_test
+from api.api import run_test
 
 
 from dotenv import load_dotenv 
