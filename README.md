@@ -11,7 +11,7 @@ cd backend
 python server.py
 ```
 ## Testing
-I created my own sample lanidn page that has multiple different booking sites: https://sample-booking-site.vercel.app/
+I created my own sample landing page that has multiple different booking sites: https://sample-booking-site.vercel.app/
 
 ## Overview
 The general idea to my solution is that we find links to known booking sites, and then proceed to test the booking flow of each link. If there are multiple booking links to multiple sites, we will will test each one of them. 
